@@ -178,27 +178,31 @@ public class ResourceApkBuilder {
         }
 
         File destResDir = new File(mOutDir.getAbsolutePath(), "res");
+        File destResDir1 = null;
         //添加修改后的res文件
         if (!config.mKeepRoot) {
-            destResDir = new File(mOutDir.getAbsolutePath(), TypedValue.RES_FILE_PATH);
+            destResDir1 = new File(mOutDir.getAbsolutePath(), TypedValue.RES_FILE_PATH);
         }
 
         /**
          * NOTE:文件数量应该是一样的，如果不一样肯定有问题
          */
         File rawResDir = new File(tempOutDir.getAbsolutePath() + File.separator + "res");
-        System.out.printf("DestResDir %d rawResDir %d\n", FileOperation.getlist(destResDir), FileOperation.getlist(rawResDir));
-        if (FileOperation.getlist(destResDir) != FileOperation.getlist(rawResDir)) {
+        long compressedCounts = FileOperation.getlist(destResDir) + FileOperation.getlist(destResDir1);
+        System.out.printf("DestResDir %d rawResDir %d\n", compressedCounts, FileOperation.getlist(rawResDir));
+        if (compressedCounts != FileOperation.getlist(rawResDir)) {
             throw new IOException(String.format(
-                "the file count of %s, and the file count of %s is not equal, there must be some problem\n",
-                rawResDir.getAbsolutePath(), destResDir.getAbsolutePath()));
+                 "the file count of %s, and the file count of %s and %s is not equal, there must be some problem\n",
+                 rawResDir.getAbsolutePath(), destResDir.getAbsolutePath(), destResDir1.getAbsolutePath()));
         }
-        if (!destResDir.exists()) {
-            System.err.printf("Missing res files, path=%s\n", destResDir.getAbsolutePath());
-            System.exit(-1);
-        }
+//        if (!destResDir.exists()) {
+//            System.err.printf("Missing res files, path=%s\n", destResDir.getAbsolutePath());
+//            System.exit(-1);
+//        }
         //这个需要检查混淆前混淆后，两个res的文件数量是否相等
         collectFiles.add(destResDir);
+        if ( null != destResDir1 )
+            collectFiles.add(destResDir1);
         File rawARSCFile = new File(mOutDir.getAbsolutePath() + File.separator + "resources.arsc");
         if (!rawARSCFile.exists()) {
             System.err.printf("Missing resources.arsc files, path=%s\n", rawARSCFile.getAbsolutePath());

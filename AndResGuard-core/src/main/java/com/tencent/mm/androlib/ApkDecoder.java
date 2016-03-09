@@ -35,6 +35,7 @@ public class ApkDecoder {
     private       File                     mOutTempARSCFile;
     private       File                     mOutARSCFile;
     private       File                     mOutResFile;
+    private       File                     outResFileKeepRoot;
     private       File                     mRawResFile;
     private       File                     mOutTempDir;
     private       File                     mResMappingFile;
@@ -100,6 +101,7 @@ public class ApkDecoder {
         //将res混淆成r
         if (!config.mKeepRoot) {
             mOutResFile = new File(mOutDir.getAbsolutePath() + File.separator + TypedValue.RES_FILE_PATH);
+            outResFileKeepRoot = new File(mOutDir.getAbsolutePath() + File.separator + "res");
         } else {
             mOutResFile = new File(mOutDir.getAbsolutePath() + File.separator + "res");
         }
@@ -195,5 +197,9 @@ public class ApkDecoder {
 
             ARSCDecoder.write(mApkFile.getDirectory().getFileInput("resources.arsc"), this, pkgs);
         }
+    }
+
+    public File getOutResFileKeepRoot() {
+        return outResFileKeepRoot;
     }
 }

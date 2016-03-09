@@ -179,6 +179,9 @@ public class ARSCDecoder {
         }
 
         Utils.cleanDir(mApkDecoder.getOutResFile());
+        if (!mApkDecoder.getConfig().mKeepRoot) {
+            Utils.cleanDir(mApkDecoder.getOutResFileKeepRoot());
+        }
     }
 
     private ResPackage[] readTable() throws IOException, AndrolibException {
@@ -599,7 +602,7 @@ public class ARSCDecoder {
 
                 String newFilePath = raw.substring(0, secondSlash);
 
-                if (!mApkDecoder.getConfig().mKeepRoot) {
+                if (!mApkDecoder.getConfig().mKeepRoot && !mProguardBuilder.isInWhiteList(mCurEntryID)) {
                     newFilePath = mOldFileName.get(raw.substring(0, secondSlash));
                 }
                 if (newFilePath == null) {
