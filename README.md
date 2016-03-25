@@ -30,26 +30,43 @@ apply plugin: 'AndResGuard'
 
 buildscript {
     dependencies {
-        classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.1.4'
+        classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.1.5'
     }
 }
 
 andResGuard {
     mappingFile = null
     use7zip = false
+    useSign = true
     keepRoot = false
     // add <yourpackagename>.R.drawable.icon into whitelist.
     // because the launcher will get the icon with his name
     whiteList = [
-            "<your_package_name>.R.drawable.icon"
-            "<your_package_name>.R.string.com.crashlytics.*"
+        //for your icon
+        "<your_package_name>.R.drawable.icon",
+        //for fabric
+        "<your_package_name>.R.string.com.crashlytics.*",
+        //for umeng update
+        "<your_package_name>.R.string.umeng*",
+        "<your_package_name>.R.string.UM*",
+        "<your_package_name>.R.string.tb_*",
+        "<your_package_name>.R.layout.umeng*",
+        "<your_package_name>.R.layout.tb_*",
+        "<your_package_name>.R.drawable.umeng*",
+        "<your_package_name>.R.drawable.tb_*",
+        "<your_package_name>.R.anim.umeng*",
+        "<your_package_name>.R.color.umeng*",
+        "<your_package_name>.R.color.tb_*",
+        "<your_package_name>.R.style.*UM*",
+        "<your_package_name>.R.style.umeng*",
+        "<your_package_name>.R.id.umeng*"
     ]
     compressFilePattern = [
-            "*.png",
-            "*.jpg",
-            "*.jpeg",
-            "*.gif",
-            "resources.arsc"
+        "*.png",
+        "*.jpg",
+        "*.jpeg",
+        "*.gif",
+        "resources.arsc"
     ]
     zipAlignPath = 'your_zipalign_path'
     sevenZipPath = 'your_7zip_path'

@@ -71,7 +71,8 @@ android {
 
 andResGuard {
     mappingFile = null
-    use7zip = true
+    use7zip = false
+    useSign = true
     keepRoot = false
     // add <yourpackagename>.R.drawable.icon into whitelist.
     // because the launcher will get the icon with his name
