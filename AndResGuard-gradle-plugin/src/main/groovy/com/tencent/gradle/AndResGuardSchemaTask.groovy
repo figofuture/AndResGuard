@@ -12,10 +12,9 @@ import org.gradle.api.tasks.TaskAction
  * @author Sim Sun (sunsj1231@gmail.com)
  */
 public class AndResGuardSchemaTask extends DefaultTask {
-    def configuration
+    def AndResGuardExtension configuration
     def android
-    String releaseApkPath
-    String releaseFolder
+    def buildConfigs = []
 
     AndResGuardSchemaTask() {
         description = 'Assemble Resource Proguard APK'
@@ -25,12 +24,14 @@ public class AndResGuardSchemaTask extends DefaultTask {
             configuration = project.andResGuard
             android = project.extensions.android
             android.applicationVariants.all { variant ->
-                println variant.buildType.name
                 if (variant.buildType.name == 'release') {
                     this.dependsOn variant.assemble
                     variant.outputs.each { output ->
-                        releaseApkPath = output.outputFile
-                        releaseFolder = "${output.outputFile.parent}/AndResProguard/"
+                        buildConfigs << new BuildInfo(
+                                output.outputFile,
+                                variant.apkVariantData.variantConfiguration.signingConfig,
+                                variant.apkVariantData.variantConfiguration.applicationId
+                        )
                     }
                 }
             }
@@ -40,29 +41,58 @@ public class AndResGuardSchemaTask extends DefaultTask {
         }
     }
 
-    @TaskAction
-    def generate() {
-        print configuration
-        InputParam.Builder builder = new InputParam.Builder()
-                .setMappingFile(configuration.mappingFile)
-                .setWhiteList(configuration.whiteList)
-                .setUse7zip(configuration.use7zip)
-                .setMetaName(configuration.metaName)
-                .setKeepRoot(configuration.keepRoot)
-                .setCompressFilePattern(configuration.compressFilePattern)
-                .setZipAlign(configuration.zipAlignPath)
-                .setSevenZipPath(configuration.sevenZipPath)
-                .setOutBuilder(releaseFolder)
-                .setApkPath(releaseApkPath)
-                .setUseSign(configuration.useSign);
+    static def useFolder(file) {
+        //remove .apk from filename
+        def fileName = file.name[0..-5]
+        return "${file.parent}/AndResGuard_${fileName}/"
+    }
 
-        if (configuration.useSign) {
-            builder.setSignFile(android.signingConfigs.release.storeFile)
-                   .setKeypass(android.signingConfigs.release.keyPassword)
-                   .setStorealias(android.signingConfigs.release.keyAlias)
-                   .setStorepass(android.signingConfigs.release.storePassword)
+    def getZipAlignPath() {
+        return "${android.getSdkDirectory().getAbsolutePath()}/build-tools/${android.buildToolsVersion}/zipalign"
+    }
+
+    @TaskAction
+    def resuguard() {
+        project.logger.info("[AndResGuard]zipaligin: path: " + getZipAlignPath())
+        project.logger.info("[AndResGuard]configuartion:$configuration")
+        def ExecutorExtension sevenzip = project.extensions.findByName("sevenzip") as ExecutorExtension
+
+        buildConfigs.each { config ->
+            def String absPath = config.file.getAbsolutePath()
+            def signConfig = config.signConfig
+            def String packageName = config.packageName
+            ArrayList<String> whiteListFullName = new ArrayList<>();
+            configuration.whiteList.each { res ->
+                if (res.startsWith("R")) {
+                    whiteListFullName.add(packageName + "." + res)
+                } else {
+                    whiteListFullName.add(res)
+                }
+            }
+            InputParam.Builder builder = new InputParam.Builder()
+                    .setMappingFile(configuration.mappingFile)
+                    .setWhiteList(whiteListFullName)
+                    .setUse7zip(configuration.use7zip)
+                    .setMetaName(configuration.metaName)
+                    .setKeepRoot(configuration.keepRoot)
+                    .setCompressFilePattern(configuration.compressFilePattern)
+                    .setZipAlign(getZipAlignPath())
+                    .setSevenZipPath(sevenzip.path)
+                    .setOutBuilder(useFolder(config.file))
+                    .setApkPath(absPath)
+                    .setUseSign(configuration.useSign);
+
+            if (configuration.useSign) {
+                if (signConfig == null) {
+                    throw new GradleException("can't the get signConfig for release build")
+                }
+                builder.setSignFile(signConfig.storeFile)
+                        .setKeypass(signConfig.keyPassword)
+                        .setStorealias(signConfig.keyAlias)
+                        .setStorepass(signConfig.storePassword)
+            }
+            InputParam inputParam = builder.create();
+            Main.gradleRun(inputParam)
         }
-        InputParam inputParam = builder.create();
-        Main.gradleRun(inputParam)
     }
 }

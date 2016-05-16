@@ -19,37 +19,37 @@ apply plugin: 'AndResGuard'
 
 buildscript {
     dependencies {
-        classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.1.5'
+        classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.1.8'
     }
 }
 
 
 andResGuard {
     mappingFile = null
-    use7zip = false
+    use7zip = true
     useSign = true
     keepRoot = false
-    // add <yourpackagename>.R.drawable.icon into whitelist.
-    // because the launcher will get thgge icon with his name
     whiteList = [
         //for your icon
-        "<your_package_name>.R.drawable.icon",
+        "R.drawable.icon",
         //for fabric
-        "<your_package_name>.R.string.com.crashlytics.*",
+        "R.string.com.crashlytics.*",
         //for umeng update
-        "<your_package_name>.R.string.umeng*",
-        "<your_package_name>.R.string.UM*",
-        "<your_package_name>.R.string.tb_*",
-        "<your_package_name>.R.layout.umeng*",
-        "<your_package_name>.R.layout.tb_*",
-        "<your_package_name>.R.drawable.umeng*",
-        "<your_package_name>.R.drawable.tb_*",
-        "<your_package_name>.R.anim.umeng*",
-        "<your_package_name>.R.color.umeng*",
-        "<your_package_name>.R.color.tb_*",
-        "<your_package_name>.R.style.*UM*",
-        "<your_package_name>.R.style.umeng*",
-        "<your_package_name>.R.id.umeng*"
+        "R.string.umeng*",
+        "R.string.UM*",
+        "R.string.tb_*",
+        "R.layout.umeng*",
+        "R.layout.tb_*",
+        "R.drawable.umeng*",
+        "R.drawable.tb_*",
+        "R.anim.umeng*",
+        "R.color.umeng*",
+        "R.color.tb_*",
+        "R.style.*UM*",
+        "R.style.umeng*",
+        "R.id.umeng*"
+        //umeng share for sina
+        "R.drawable.sina*"
     ]
     compressFilePattern = [
         "*.png",
@@ -58,15 +58,17 @@ andResGuard {
         "*.gif",
         "resources.arsc"
     ]
-    zipAlignPath = 'your_zipalign_path'
-    sevenZipPath = 'your_7zip_path'
+     sevenzip {
+         artifact = 'com.tencent.mm:SevenZip:1.1.8'
+         //path = "/usr/local/bin/7za"
+    }
 }
 ```
 
 运行`andresguard/resguard`的gradle任务，可以得到资源混淆的安装包
 命令行可直接运行```./gradlew resguard```
 
-**注意: 在build.gradle文件中请把andResGuard的相关配置放在签名信息的下面,我们会使用你的签名信息用户重新打包APK**
+在设置`sevenzip`时, 你只需设置`artifact`或`path`. 支持同时设置,总以path的值为优先.
 
 ## 如何使用资源混淆工具 ##
 

@@ -1,3 +1,5 @@
+package com.tencent.gradle
+
 /**
  * The configuration properties.
  *
@@ -6,15 +8,13 @@
 
 public class AndResGuardExtension {
 
-    String mappingFile;
+    File mappingFile;
     boolean use7zip;
     boolean useSign;
     String metaName;
     boolean keepRoot;
     Iterable<String> whiteList;
     Iterable<String> compressFilePattern;
-    String zipAlignPath;
-    String sevenZipPath;
 
     public AndResGuardExtension() {
         use7zip = false
@@ -24,8 +24,35 @@ public class AndResGuardExtension {
         whiteList = []
         compressFilePattern = []
         mappingFile = null
-        zipAlignPath = "zipalign"
-        sevenZipPath = "7za"
+    }
+
+
+    Iterable<String> getCompressFilePattern() {
+        return compressFilePattern
+    }
+
+    File getMappingFile() {
+        return mappingFile
+    }
+
+    boolean getUse7zip() {
+        return use7zip
+    }
+
+    boolean getUseSign() {
+        return useSign
+    }
+
+    String getMetaName() {
+        return metaName
+    }
+
+    boolean getKeepRoot() {
+        return keepRoot
+    }
+
+    Iterable<String> getWhiteList() {
+        return whiteList
     }
 
     @Override
@@ -36,8 +63,6 @@ public class AndResGuardExtension {
            | keepRoot = ${keepRoot}
            | whiteList = ${whiteList}
            | compressFilePattern = ${compressFilePattern}
-           | zipAlignPath = ${zipAlignPath}
-           | 7zipPath = ${sevenZipPath}
         """.stripMargin()
     }
 }
